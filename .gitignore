@@ -1,0 +1,9 @@
+/SonzaiigiApi/.vs
+/SonzaiigiApi/bin
+/SonzaiigiApi/obj
+/frontend/dist
+/frontend/node_modules
+/Android/.idea
+/Android/.kotlin/sessions
+/Android/.gradle
+/Android/app/build

@@ -1,0 +1,6 @@
+@SonzaiigiApi_HostAddress = http://localhost:5220
+
+GET {{SonzaiigiApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,43 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@headlessui/react": "^2.0.0",
+        "@tailwindcss/forms": "^0.5.3",
+        "@tailwindcss/vite": "^4.0.0",
+        "@vitejs/plugin-basic-ssl": "^2.1.0",
+        "@vitejs/plugin-react": "^4.2.0",
+        "autoprefixer": "^10.4.12",
+        "axios": "^1.14.0",
+        "concurrently": "^9.0.1",
+        "postcss": "^8.4.31",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss": "^3.2.1",
+        "vite": "^7.0.7"
+    },
+    "dependencies": {
+        "@dnd-kit/core": "^6.3.1",
+        "@dnd-kit/sortable": "^10.0.0",
+        "@dnd-kit/utilities": "^3.2.2",
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@giphy/js-fetch-api": "^5.7.0",
+        "@giphy/react-components": "^10.1.1",
+        "@mui/icons-material": "^7.3.6",
+        "@mui/lab": "^7.0.1-beta.21",
+        "@mui/material": "^7.3.6",
+        "emoji-picker-react": "^4.18.0",
+        "r": "^0.0.5",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3",
+        "react-rnd": "^10.5.3",
+        "react-router-dom": "^7.14.0"
+    }
+}
