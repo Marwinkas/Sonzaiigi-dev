@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "16078423483",
+    "project_id": "sonzaiigi-790c3",
+    "storage_bucket": "sonzaiigi-790c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:16078423483:android:8fb1eb5bc2b4c2fbbeb09e",
+        "android_client_info": {
+          "package_name": "com.marwinka.sonzaiigi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRYdajhw5RzeMNXEW8bcGXvDDlgGz2iyQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
