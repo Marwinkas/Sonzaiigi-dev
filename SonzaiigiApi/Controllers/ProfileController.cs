@@ -152,14 +152,12 @@ public class ProfileController : ControllerBase
         var user = await _context.Users.FindAsync(userId);
         if (user == null) return NotFound();
 
-        if (await _context.Users.AnyAsync(u => u.Email == dto.Email && u.Id != userId))
-            return BadRequest(new { errors = new { email = "Этот email уже занят" } });
-
+    
         if (await _context.Users.AnyAsync(u => u.Username == dto.Username && u.Id != userId))
             return BadRequest(new { errors = new { username = "Это имя пользователя уже занято" } });
 
-        user.Name = dto.Name; user.Username = dto.Username; user.Email = dto.Email; user.UpdatedAt = DateTime.UtcNow;
-
+        user.Name = dto.Name; user.Username = dto.Username; user.UpdatedAt = DateTime.UtcNow;
+        user.Bio = dto.Bio; // ✨ СОХРАНЯЕМ БИО
         if (dto.Avatar != null)
         {
             await EnsureBucketExistsAsync();
@@ -180,7 +178,7 @@ public class ProfileController : ControllerBase
         var wsPayload = new { type = "user_updated", user_id = user.Id, name = user.Name, avatar = GetFileUrl(user.Avatar), username = user.Username };
         await _redis.GetDatabase().PublishAsync(RedisChannel.Literal("chat_events"), JsonSerializer.Serialize(wsPayload));
 
-        return Ok(new { user = new { user.Id, user.Email, user.Name, user.Username, user.Avatar } });
+        return Ok(new { user = new { user.Id, user.Name, user.Username, user.Avatar, user.Bio } });
     }
 
     [HttpPut("password")]
@@ -198,7 +196,20 @@ public class ProfileController : ControllerBase
 
         return Ok();
     }
+    // В ProfileController.cs
+    [HttpGet("~/api/users/{id}")] // Полный путь будет api/users/{id}
+    public async Task<IActionResult> GetUserProfileById(int id) // ✨ Переименовали для ясности
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null) return NotFound();
 
+        return Ok(new
+        {
+            user = new { user.Id, user.Name, user.Username, avatar = GetFileUrl(user.Avatar),
+                bio = user.Bio
+            }
+        });
+    }
     [HttpGet("~/api/users/profile/{username}")]
     public async Task<IActionResult> GetProfile(string username)
     {
@@ -213,7 +224,9 @@ public class ProfileController : ControllerBase
 
         return Ok(new
         {
-            user = new { user.Id, user.Name, user.Username, avatar = GetFileUrl(user.Avatar) },
+            user = new { user.Id, user.Name, user.Username, avatar = GetFileUrl(user.Avatar),
+                bio = user.Bio
+            },
             interactions = new { isFollowing, isFollowedByThem, isBlocking }
         });
     }

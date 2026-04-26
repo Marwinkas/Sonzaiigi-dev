@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SonzaiigiApi.Data;
@@ -11,9 +12,11 @@ using SonzaiigiApi.Data;
 namespace SonzaiigiApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260425204447_AddAttachmentsTable")]
+    partial class AddAttachmentsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -126,9 +129,6 @@ namespace SonzaiigiApi.Migrations
 
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("LastReadMessageId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Nickname")
                         .HasColumnType("text");
@@ -429,52 +429,6 @@ namespace SonzaiigiApi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Messages");
-                });
-
-            modelBuilder.Entity("SonzaiigiApi.Models.MessageAttachment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Duration")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ExtraInfo")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("Height")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MessageId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Size")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("Width")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
-
-                    b.ToTable("MessageAttachment");
                 });
 
             modelBuilder.Entity("SonzaiigiApi.Models.Mute", b =>
@@ -829,17 +783,6 @@ namespace SonzaiigiApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SonzaiigiApi.Models.MessageAttachment", b =>
-                {
-                    b.HasOne("SonzaiigiApi.Models.Message", "Message")
-                        .WithMany("Attachments")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-                });
-
             modelBuilder.Entity("SonzaiigiApi.Models.Mute", b =>
                 {
                     b.HasOne("SonzaiigiApi.Models.User", null)
@@ -921,8 +864,6 @@ namespace SonzaiigiApi.Migrations
 
             modelBuilder.Entity("SonzaiigiApi.Models.Message", b =>
                 {
-                    b.Navigation("Attachments");
-
                     b.Navigation("DeletedMessages");
 
                     b.Navigation("Reactions");

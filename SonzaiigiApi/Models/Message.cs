@@ -1,11 +1,42 @@
 namespace SonzaiigiApi.Models;
 
+public enum AttachmentType
+{
+    Image,
+    Video,
+    Audio,
+    File,
+    Gif
+}
+
+public class MessageAttachment
+{
+    public int Id { get; set; }
+    public int MessageId { get; set; }
+    public Message Message { get; set; } = null!;
+
+    public AttachmentType Type { get; set; }
+
+    // Основная ссылка (master/оригинал)
+    public string Url { get; set; } = string.Empty;
+    public int? Width { get; set; }  // Ширина в пикселях
+    public int? Height { get; set; } // Высота в пикселях
+    // Дополнительные данные (название файла, размер)
+    public string? Name { get; set; }
+    public string? Size { get; set; }
+
+    // Метаданные (длительность для аудио/видео, обложка, артист)
+    // Чтобы не плодить колонки, можно хранить доп. инфу в JSON или отдельных полях
+    public string? Duration { get; set; }
+    public string? ThumbnailUrl { get; set; } // Для видео-превью или сжатых фото
+    public string? ExtraInfo { get; set; } // Сюда можно писать "Артист - Название" для музыки
+}
 public class Message
 {
     public int Id { get; set; }
     public int ConversationId { get; set; }
     public Conversation Conversation { get; set; } = null!;
-
+    public List<MessageAttachment> Attachments { get; set; } = new();
     public int UserId { get; set; }
     public User User { get; set; } = null!;
 

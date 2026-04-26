@@ -4,9 +4,26 @@ using Microsoft.IdentityModel.Tokens;
 using SonzaiigiApi.Data;
 using System.Text;
 using StackExchange.Redis;
+
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+
 var builder = WebApplication.CreateBuilder(args);
 
+var firebaseCredPath = Path.Combine(Directory.GetCurrentDirectory(), "firebase-key.json");
 
+if (File.Exists(firebaseCredPath))
+{
+    FirebaseApp.Create(new AppOptions()
+    {
+        Credential = GoogleCredential.FromFile(firebaseCredPath)
+    });
+    Console.WriteLine("✅ Firebase успешно инициализирован.");
+}
+else
+{
+    Console.WriteLine("⚠️ ВНИМАНИЕ: Файл firebase-key.json не найден. Пуши работать не будут.");
+}
 builder.WebHost.UseUrls("http://127.0.0.1:5000");
 
 // Подключение к PostgreSQL
@@ -46,8 +63,6 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
-
-
 
 
 

@@ -62,8 +62,21 @@ public class GroupsController : ControllerBase
         // Теперь мы разрешаем действие ТОЛЬКО если оно явно включено (стоит галочка) хотя бы в одной из ролей.
         return member.MemberRoles.Any(mr => mr.Role.Permissions.TryGetValue(perm, out bool p) && p);
     }
+    [HttpPost("{id}/toggle-mute")]
+    public async Task<IActionResult> ToggleGroupMute(int id)
+    {
+        var myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var member = await _context.ConversationMembers
+            .FirstOrDefaultAsync(m => m.ConversationId == id && m.UserId == myId);
 
-    [HttpGet("{id}")]
+        if (member == null) return NotFound();
+
+        member.IsMuted = !member.IsMuted; // Нужно добавить колонку IsMuted в таблицу ConversationMember
+        await _context.SaveChangesAsync();
+
+        return Ok(new { is_muted = member.IsMuted });
+    }
+    [HttpGet("{id}")] // Полный путь будет api/groups/{id}
     public async Task<IActionResult> GetGroupInfo(int id)
     {
         var myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -86,15 +99,17 @@ public class GroupsController : ControllerBase
             id = group.Id,
             name = group.Name,
             description = group.Description,
+            isPrivate = group.IsPrivate,
             avatar = GetFileUrl(group.Avatar),
             invite_token = group.IsPrivate ? null : group.InviteToken,
             sysMsgs = new { join = group.SysMsgJoin, leave = group.SysMsgLeave, edit = group.SysMsgEdit },
             slowMode = group.SlowMode,
-
+            isMuted = myMember.IsMuted,
             roles = group.Roles.OrderBy(r => r.Hierarchy).Select(r => new {
                 id = r.Id,
                 name = r.Name,
                 color = r.Color,
+                isMuted = myMember.IsMuted,
                 icon = GetFileUrl(r.Icon),
                 mentionable = r.IsMentionable,
                 hierarchy = r.Hierarchy,
@@ -129,7 +144,7 @@ public class GroupsController : ControllerBase
             })
         });
     }
-
+  
     [HttpPatch("{id}")]
     public async Task<IActionResult> UpdateGroup(int id, [FromForm] UpdateGroupDto dto)
     {
@@ -150,7 +165,7 @@ public class GroupsController : ControllerBase
 
             group.InviteToken = dto.InviteToken;
         }
-
+        if (dto.IsPrivate.HasValue) group.IsPrivate = dto.IsPrivate.Value;
         // Права на остальные настройки
         if (dto.Name != null || dto.Description != null || dto.Avatar != null || dto.SlowMode.HasValue || dto.SysMsgJoin.HasValue || dto.SysMsgLeave.HasValue || dto.SysMsgEdit.HasValue)
         {
@@ -180,6 +195,45 @@ public class GroupsController : ControllerBase
         await LogAction(group.Id, myId, "обновил(а) настройки группы");
 
         var wsPayload = new { type = "group_updated", chat_id = group.Id, description = group.Description, name = group.Name, avatar = GetFileUrl(group.Avatar) };
+        await _redis.GetDatabase().PublishAsync(RedisChannel.Literal("chat_events"), JsonSerializer.Serialize(wsPayload));
+
+        return Ok(new { success = true });
+    }
+    [HttpDelete("{id}/roles/{roleId}")]
+    public async Task<IActionResult> DeleteRole(int id, int roleId)
+    {
+        var myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var group = await _context.Conversations
+            .Include(c => c.Members).ThenInclude(m => m.MemberRoles).ThenInclude(mr => mr.Role)
+            .Include(c => c.Roles)
+            .FirstOrDefaultAsync(c => c.Id == id && c.IsGroup);
+
+        if (group == null) return NotFound();
+
+        var myMember = group.Members.FirstOrDefault(m => m.UserId == myId);
+        if (myMember == null || !HasPermission(myMember, "manageRoles")) return Forbid();
+
+        var role = group.Roles.FirstOrDefault(r => r.Id == roleId);
+        if (role == null) return NotFound();
+
+        // Защита: нельзя удалить системную роль владельца (0)
+        if (role.Hierarchy == 0)
+            return BadRequest(new { message = "Нельзя удалить системную роль владельца" });
+
+        // Защита: админ не может удалить роль, которая выше или равна его собственной
+        if (!myMember.IsOwner)
+        {
+            var myHighestRole = group.Roles.Where(r => myMember.MemberRoles.Select(mr => mr.RoleId).Contains(r.Id)).Min(r => r.Hierarchy);
+            if (myHighestRole >= role.Hierarchy)
+                return StatusCode(403, new { message = "Вы не можете удалить эту роль, так как она выше или равна вашей" });
+        }
+
+        _context.GroupRoles.Remove(role);
+        await _context.SaveChangesAsync();
+        await LogAction(id, myId, $"удалил(а) роль '{role.Name}'");
+
+        // Уведомляем участников чата, чтобы у них обновился список ролей
+        var wsPayload = new { type = "chat_roles_updated", chat_id = id };
         await _redis.GetDatabase().PublishAsync(RedisChannel.Literal("chat_events"), JsonSerializer.Serialize(wsPayload));
 
         return Ok(new { success = true });
@@ -505,6 +559,7 @@ public class UpdateGroupDto
     public string? Description { get; set; }
     public IFormFile? Avatar { get; set; }
     public string? InviteToken { get; set; }
+    public bool? IsPrivate { get; set; }
     public int? SlowMode { get; set; }
     public bool? SysMsgJoin { get; set; }
     public bool? SysMsgLeave { get; set; }

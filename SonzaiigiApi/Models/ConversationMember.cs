@@ -16,10 +16,10 @@ public class ConversationMember
     public User User { get; set; } = null!;
 
     public bool IsOwner { get; set; } = false;
-
+    public bool IsMuted { get; set; } = false;
     // СЮДА ДОБАВИЛИ НИКНЕЙМ (он может быть null, если человек использует обычное имя)
     public string? Nickname { get; set; }
-
+    public int LastReadMessageId { get; set; } = 0;
     // Гарантируем, что по умолчанию здесь всегда пустой JSON
     public string OverridesJson { get; set; } = "{}";
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SonzaiigiApi.Data;
@@ -11,9 +12,11 @@ using SonzaiigiApi.Data;
 namespace SonzaiigiApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260425205525_AddAttachmentsTables")]
+    partial class AddAttachmentsTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -126,9 +129,6 @@ namespace SonzaiigiApi.Migrations
 
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("LastReadMessageId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Nickname")
                         .HasColumnType("text");
@@ -445,9 +445,6 @@ namespace SonzaiigiApi.Migrations
                     b.Property<string>("ExtraInfo")
                         .HasColumnType("text");
 
-                    b.Property<int?>("Height")
-                        .HasColumnType("integer");
-
                     b.Property<int>("MessageId")
                         .HasColumnType("integer");
 
@@ -466,9 +463,6 @@ namespace SonzaiigiApi.Migrations
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int?>("Width")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

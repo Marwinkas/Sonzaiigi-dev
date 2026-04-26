@@ -11,10 +11,10 @@ public class User
     public string? GoogleId { get; set; }
     public string? VerificationCode { get; set; }
     public string? Avatar { get; set; }
-
+    public string? Bio { get; set; } // ✨ НОВОЕ ПОЛЕ
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
+    public string? FcmToken { get; set; }
     // --- Связи (Аналог Eloquent Relations) ---
     public List<Post> Posts { get; set; } = new();
     public List<Post> LikedPosts { get; set; } = new();
